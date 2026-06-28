@@ -30,6 +30,7 @@ class Menu:
 
         background_color = "#cc3628"
 
+
         self.original_bg_image = Image.open("Screenshot 2026-05-18 124046.png")
         self.bg_label= self.original_bg_image.resize((9999, 9999))
         self.bg_photo = ImageTk.PhotoImage(self.original_bg_image)
