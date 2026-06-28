@@ -71,13 +71,20 @@ class Menu:
                            image=self.button5, activebackground="#cc3628", activeforeground="white")
         self.img5.place(x=61, y=750)
 
-        self.img_order = customtkinter.CTkButton(root, fg_color="black", command=self.order,
-                                                  corner_radius=100, height=65, width=10,
-                                                  border_width=3, bg_color="#153c7d")
+        # In __init__, replace the img_order button and remove overlay/menu_window lines, add these:
+
+        self.img_order = customtkinter.CTkButton(root, fg_color="black", command=self.toggle_sidebar,
+                                                 corner_radius=100, height=65, width=10,
+                                                 border_width=3, bg_color="#153c7d")
         self.img_order.place(x=1070, y=0)
 
-        self.parent.bind("<Configure>", self.resize_bg)
+        # Sidebar frame — placed off-screen to the right initially
+        self.sidebar = Frame(root, bg="blue", width=300)
+        self.sidebar_visible = False
+        # Don't place it yet; we'll use place() to show/hide it
 
+        self.overlay = None
+        self.menu_window = None  # keep for compatibility but won't be used
         self.quiz_frame = Frame(root, background=background_color)
         self.quiz_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
@@ -103,41 +110,54 @@ class Menu:
             pass
 
     def update_order_display(self):
-        if self.menu_window is None or not self.menu_window.winfo_exists():
+        if not self.sidebar_visible:
             return
 
-        for widget in self.menu_window.winfo_children():
+        for widget in self.sidebar.winfo_children():
             widget.destroy()
 
-        Label(self.menu_window, text="Your Order", font=("arial", 16, "bold"),
+        Label(self.sidebar, text="Your Order", font=("arial", 16, "bold"),
               bg="blue", fg="white").pack(pady=10)
 
         total = 0
         for name, price in self.order_items:
-            Label(self.menu_window, text=f"{name}  ${price:.2f}",
+            Label(self.sidebar, text=f"{name}  ${price:.2f}",
                   font=("arial", 12), bg="blue", fg="white").pack(pady=2)
             total += price
 
-        Label(self.menu_window, text=f"Total: ${total:.2f}",
+        Label(self.sidebar, text=f"Total: ${total:.2f}",
               font=("arial", 14, "bold"), bg="blue", fg="white").pack(pady=10)
 
         customtkinter.CTkButton(
-            self.menu_window, text="Clear Order", fg_color="#cc3628",
+            self.sidebar, text="Clear Order", fg_color="#cc3628",
             hover_color="#a02010", corner_radius=10,
             command=self.clear_order
         ).pack(pady=10)
+
+        # Close button at the top
+        customtkinter.CTkButton(
+            self.sidebar, text="✕ Close", fg_color="#333333",
+            hover_color="#555555", corner_radius=10,
+            command=self.toggle_sidebar
+        ).pack(pady=5)
+    def toggle_sidebar(self):
+        if self.sidebar_visible:
+            self.sidebar.place_forget()
+            self.sidebar_visible = False
+        else:
+            # Place sidebar on the right edge, full height
+            self.sidebar.place(x=root.winfo_width() - 300, y=0, width=300, height=root.winfo_height())
+            self.sidebar.lift()
+            self.sidebar_visible = True
+            self.update_order_display()
 
     def clear_order(self):
         self.order_items = []
         self.update_order_display()
 
     def order(self):
-        if self.overlay and self.overlay.winfo_exists():
-            self.menu_window.destroy()
-            self.overlay.destroy()
-            self.overlay = None
-            self.menu_window = None
-            return
+        # Kept for compatibility; now just calls toggle
+        self.toggle_sidebar()
 
         self.overlay = tk.Toplevel(self.parent)
         self.overlay.attributes("-fullscreen", True)
