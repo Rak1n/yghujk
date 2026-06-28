@@ -31,13 +31,15 @@ class Menu:
         background_color = "#cc3628"
 
         self.original_bg_image = Image.open("Screenshot 2026-05-18 124046.png")
+        self.bg_label= self.original_bg_image.resize((9999, 9999))
         self.bg_photo = ImageTk.PhotoImage(self.original_bg_image)
         self.bg_label = Label(root, image=self.bg_photo)
         self.bg_label.image = self.bg_photo
-        self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        self.bar = Label(root, width=1080, height=4, bg="#153c7d")
-        self.bar.place(x=0, y=0)
+        self.bg_label.place(x=0, y=0)
+
+        self.bar = Label(root, bg="#153c7d")
+        self.bar.place(x=0, y=0, relwidth=1, height=60)
 
         self.text = Label(root, text="Mount Roskill Grammar", font=("arial", 30, "underline", "bold"), bg="#cc3628")
         self.text.place(x=870, y=500)
@@ -90,7 +92,6 @@ class Menu:
 
         self.content_frame = Frame(self.quiz_frame, background=background_color)
         self.content_frame.grid()
-        self.bg_label.pack()
 
         self.overlay = None
         self.menu_window = None
