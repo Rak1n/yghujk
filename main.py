@@ -30,12 +30,14 @@ class Menu:
 
         background_color = "#cc3628"
 
-
         self.original_bg_image = Image.open("Screenshot 2026-05-18 124046.png")
-        self.bg_label= self.original_bg_image.resize((9999, 9999))
+        # Resize immediately to fill the window on startup
+        self.original_bg_image = self.original_bg_image.resize((1920, 1080), Image.LANCZOS)
         self.bg_photo = ImageTk.PhotoImage(self.original_bg_image)
-        self.bg_label = Label(root, image=self.bg_photo)
+        self.bg_label = Label(root, image=self.bg_photo, borderwidth=0, highlightthickness=0)
         self.bg_label.image = self.bg_photo
+        self.bg_label.place(x=0, y=0, width=1920, height=1080)
+        self.bg_label.lower()  # Push it behind everything else
 
         self.bg_label.place(x=0, y=0)
 
@@ -99,11 +101,11 @@ class Menu:
 
     def resize_bg(self, event):
         if event.widget == self.parent:
-            new_image = self.original_bg_image.resize((event.width, event.height))
+            new_image = self.original_bg_image.resize((event.width, event.height), Image.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(new_image)
             self.bg_label.config(image=self.bg_photo)
             self.bg_label.image = self.bg_photo
-
+            self.bg_label.lower()  # Keep it behind after every resize
     def add_to_order(self, item_name, price):
         self.order_items.append((item_name, price))
         try:
