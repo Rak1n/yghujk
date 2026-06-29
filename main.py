@@ -99,6 +99,7 @@ class Menu:
         self.overlay = None
         self.menu_window = None
 
+
     def resize_bg(self, event):
         if event.widget == self.parent:
             new_image = self.original_bg_image.resize((event.width, event.height), Image.LANCZOS)
