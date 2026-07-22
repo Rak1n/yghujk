@@ -95,16 +95,14 @@ class Menu:
         self.overlay = None
         self.menu_window = None
 
-        # --- NEW: a single container frame that holds whichever section's ---
-        # --- cards are currently on screen. Every section-building method ---
-        # --- (pita/main/sides/specials) builds its widgets inside this frame ---
-        # --- instead of directly on `root`. To clear a section we just ---
-        # --- destroy this one frame and recreate it — no need to track ---
-        # --- dozens of individual widget references.
-        self.items_frame = Frame(root, bg="#cc3628", bd=0, highlightthickness=0)
-        self.items_frame.place(x=0, y=0, width=1920, height=1080)
-        self.items_frame.lower(self.bg_label)  # keep it above bg but we'll raise cards as needed
-        self.items_frame.lift(self.bg_label)
+        # --- NEW: a list that tracks every widget created by the section
+        # --- methods (pita/main/sides/specials). We DON'T use a covering
+        # --- Frame for this, because a Frame always paints an opaque
+        # --- background across its whole area — a full-screen frame would
+        # --- hide the background image behind it. Instead we parent each
+        # --- card widget directly to `root` (like the original code did)
+        # --- and just destroy them individually when switching sections.
+        self.menu_widgets = []
 
     def resize_bg(self, event):
         if event.widget == self.parent:
@@ -116,15 +114,20 @@ class Menu:
 
     # ------------------------------------------------------------------
     # NEW: call this at the top of every method that draws a section's
-    # cards (pita, main, sides, specials). It destroys the ENTIRE old
-    # frame (and therefore every widget inside it, all at once) and
-    # replaces it with a fresh empty frame ready to be filled in.
+    # cards (pita, main, sides, specials). It destroys every widget that
+    # was tracked from the PREVIOUS section, then empties the list so
+    # the new section can start tracking its own widgets.
     # ------------------------------------------------------------------
     def clear_items(self):
-        self.items_frame.destroy()
-        self.items_frame = Frame(root, bg="#cc3628", bd=0, highlightthickness=0)
-        self.items_frame.place(x=0, y=0, width=1920, height=1080)
-        self.items_frame.lift(self.bg_label)
+        for widget in self.menu_widgets:
+            widget.destroy()
+        self.menu_widgets = []
+
+    # Small helper so we don't forget to append a widget to the tracking
+    # list every time we create one — wrap the widget constructor call.
+    def track(self, widget):
+        self.menu_widgets.append(widget)
+        return widget
 
     def add_to_order(self, item_name, price):
         self.order_items.append((item_name, price))
@@ -220,147 +223,150 @@ class Menu:
             self.menu_window = None
 
     # ------------------------------------------------------------------
-    # Every card below is now built with `self.items_frame` as the parent
-    # (instead of `root`), and `clear_items()` is called first. That's the
-    # entire fix — nothing else about the layout/logic changes.
+    # Every card below is parented to `root` (same as your original code,
+    # so the background image is never covered except by the actual card
+    # widgets). `clear_items()` is called first to remove the PREVIOUS
+    # section's widgets, and every widget created here is wrapped in
+    # `self.track(...)` so it gets added to the tracking list and can be
+    # destroyed the next time a different section button is clicked.
     # ------------------------------------------------------------------
     def pita(self):
         self.clear_items()
-        parent = self.items_frame
+        parent = root
 
-        self.background = Label(parent, width=200, height=200, bg="#cc3628")
+        self.background = self.track(Label(parent, width=200, height=200, bg="#cc3628"))
         self.background.place(x=600, y=500)
 
         # --- Card 1: Teriyaki Pita ---
-        self.backblue = customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
-            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23)
+        self.backblue = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
+            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23))
         self.backblue.place(x=350, y=400)
 
-        self.lightblue = customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
-            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23)
+        self.lightblue = self.track(customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
+            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23))
         self.lightblue.place(x=393, y=440)
         self.lightblue.lift()
 
         self.food_image = Image.open('Untitled Design - 1.png')
         self.food_image = self.food_image.resize((200, 200))
         self.food_image = ImageTk.PhotoImage(self.food_image)
-        self.food_load = Label(parent, borderwidth=0, border=0, height=75, width=120, bg="#416db6", image=self.food_image)
+        self.food_load = self.track(Label(parent, borderwidth=0, border=0, height=75, width=120, bg="#416db6", image=self.food_image))
         self.food_load.place(x=420, y=450)
         self.food_load.lift()
 
-        self.pita_name = Label(parent, text="Teriyaki Pita", font=("arial", 11, "bold"), bg="#153c7d", fg="white")
+        self.pita_name = self.track(Label(parent, text="Teriyaki Pita", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.pita_name.place(x=425, y=575)
 
-        self.pita_desc = Label(parent, text="Fresh plain pita with shredded\nchicken, fresh veggies, cheese,\nand yummy teriyaki sauce.",
-            font=("arial", 9), bg="#153c7d", fg="white")
+        self.pita_desc = self.track(Label(parent, text="Fresh plain pita with shredded\nchicken, fresh veggies, cheese,\nand yummy teriyaki sauce.",
+            font=("arial", 9), bg="#153c7d", fg="white"))
         self.pita_desc.place(x=380, y=598)
 
-        self.price_label = Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white")
+        self.price_label = self.track(Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label.place(x=375, y=665)
 
-        self.add_btn = customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
+        self.add_btn = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
-            command=lambda: self.add_to_order("Teriyaki Pita", 8.25))
+            command=lambda: self.add_to_order("Teriyaki Pita", 8.25)))
         self.add_btn.place(x=470, y=662)
 
         # --- Card 2 ---
-        self.backblue1 = customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
-            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23)
+        self.backblue1 = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
+            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23))
         self.backblue1.place(x=650, y=400)
 
-        self.lightblue1 = customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
-            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23)
+        self.lightblue1 = self.track(customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
+            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23))
         self.lightblue1.place(x=693, y=440)
         self.lightblue1.lift()
 
-        self.card2_name = Label(parent, text="Falafel Pita", font=("arial", 11, "bold"), bg="#153c7d", fg="white")
+        self.card2_name = self.track(Label(parent, text="Falafel Pita", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.card2_name.place(x=735, y=575)
 
-        self.card2_desc = Label(parent, text="Fresh plain pita with falafel,\n fresh veggies, cheese, \nand sweet chilli sauce.",
-            font=("arial", 9), bg="#153c7d", fg="white")
+        self.card2_desc = self.track(Label(parent, text="Fresh plain pita with falafel,\n fresh veggies, cheese, \nand sweet chilli sauce.",
+            font=("arial", 9), bg="#153c7d", fg="white"))
         self.card2_desc.place(x=700, y=598)
 
-        self.price_label2 = Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white")
+        self.price_label2 = self.track(Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label2.place(x=675, y=665)
 
-        self.add_btn2 = customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
+        self.add_btn2 = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
-            command=lambda: self.add_to_order("Falafel Pita", 8.25))
+            command=lambda: self.add_to_order("Falafel Pita", 8.25)))
         self.add_btn2.place(x=770, y=662)
 
         # --- Card 3 ---
-        self.backblue2 = customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
-            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23)
+        self.backblue2 = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
+            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23))
         self.backblue2.place(x=950, y=400)
 
-        self.lightblue2 = customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
-            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23)
+        self.lightblue2 = self.track(customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
+            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23))
         self.lightblue2.place(x=993, y=440)
         self.lightblue2.lift()
 
-        self.card3_name = Label(parent, text=" Chicken Pita - Mayonnaise", font=("arial", 11, "bold"), bg="#153c7d", fg="white")
+        self.card3_name = self.track(Label(parent, text=" Chicken Pita - Mayonnaise", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.card3_name.place(x=975, y=575)
 
-        self.card3_desc = Label(parent, text="Fresh plain pita with shredded \nchicken,  fresh veggies, \ncheese, and creamy mayo.",
-            font=("arial", 9), bg="#153c7d", fg="white")
+        self.card3_desc = self.track(Label(parent, text="Fresh plain pita with shredded \nchicken,  fresh veggies, \ncheese, and creamy mayo.",
+            font=("arial", 9), bg="#153c7d", fg="white"))
         self.card3_desc.place(x=985, y=598)
 
-        self.price_label3 = Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white")
+        self.price_label3 = self.track(Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label3.place(x=975, y=665)
 
-        self.add_btn3 = customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
+        self.add_btn3 = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
-            command=lambda: self.add_to_order(" Chicken Pita - Mayonnaise", 8.25))
+            command=lambda: self.add_to_order(" Chicken Pita - Mayonnaise", 8.25)))
         self.add_btn3.place(x=1070, y=662)
 
         # --- Card 4 ---
-        self.backblue3 = customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
-            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23)
+        self.backblue3 = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
+            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23))
         self.backblue3.place(x=1250, y=400)
 
-        self.lightblue3 = customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
-            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23)
+        self.lightblue3 = self.track(customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
+            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23))
         self.lightblue3.place(x=1293, y=440)
         self.lightblue3.lift()
 
-        self.card4_name = Label(parent, text="Chicken Pita - BBQ - LT", font=("arial", 11, "bold"), bg="#153c7d", fg="white")
+        self.card4_name = self.track(Label(parent, text="Chicken Pita - BBQ - LT", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.card4_name.place(x=1275, y=575)
 
-        self.card4_desc = Label(parent, text="Fresh plain pita with shredded \nchicken, fresh veggies,\n cheese, and classic BBQ sauce.",
-            font=("arial", 9), bg="#153c7d", fg="white")
+        self.card4_desc = self.track(Label(parent, text="Fresh plain pita with shredded \nchicken, fresh veggies,\n cheese, and classic BBQ sauce.",
+            font=("arial", 9), bg="#153c7d", fg="white"))
         self.card4_desc.place(x=1285, y=598)
 
-        self.price_label4 = Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white")
+        self.price_label4 = self.track(Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label4.place(x=1275, y=665)
 
-        self.add_btn4 = customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
+        self.add_btn4 = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
-            command=lambda: self.add_to_order("Chicken Pita - BBQ - LT", 8.25))
+            command=lambda: self.add_to_order("Chicken Pita - BBQ - LT", 8.25)))
         self.add_btn4.place(x=1370, y=662)
 
         # --- Card 5 ---
-        self.backblue4 = customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
-            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23)
+        self.backblue4 = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
+            height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23))
         self.backblue4.place(x=1550, y=400)
 
-        self.lightblue4 = customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
-            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23)
+        self.lightblue4 = self.track(customtkinter.CTkButton(parent, hover_color="#416db6", height=120, width=160,
+            text="", bg_color="#153c7d", fg_color="#416db6", text_color="#ffffff", corner_radius=23))
         self.lightblue4.place(x=1593, y=440)
         self.lightblue4.lift()
 
-        self.card5_name = Label(parent, text="Chicken Pita - Sweet Chilli - LT", font=("arial", 11, "bold"), bg="#153c7d", fg="white")
+        self.card5_name = self.track(Label(parent, text="Chicken Pita - Sweet Chilli - LT", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.card5_name.place(x=1565, y=575)
 
-        self.card5_desc = Label(parent, text="Fresh plain pita with\n shredded chicken, fresh veggies, \ncheese, and sweet chilli sauce.",
-            font=("arial", 9), bg="#153c7d", fg="white")
+        self.card5_desc = self.track(Label(parent, text="Fresh plain pita with\n shredded chicken, fresh veggies, \ncheese, and sweet chilli sauce.",
+            font=("arial", 9), bg="#153c7d", fg="white"))
         self.card5_desc.place(x=1585, y=598)
 
-        self.price_label5 = Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white")
+        self.price_label5 = self.track(Label(parent, text="$8.25", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label5.place(x=1575, y=665)
 
-        self.add_btn5 = customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
+        self.add_btn5 = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
-            command=lambda: self.add_to_order(" Chicken Pita - Sweet Chilli - LT", 8.25))
+            command=lambda: self.add_to_order(" Chicken Pita - Sweet Chilli - LT", 8.25)))
         self.add_btn5.place(x=1670, y=662)
 
         # NOTE: the old broken line `self.sides.destroy()` has been removed.
@@ -369,59 +375,59 @@ class Menu:
 
     def main(self):
         self.clear_items()
-        parent = self.items_frame
+        parent = root
 
-        self.background = Label(parent, width=200, height=200, bg="#cc3628")
+        self.background = self.track(Label(parent, width=200, height=200, bg="#cc3628"))
         self.background.place(x=600, y=500)
 
         self.image9 = PhotoImage(file='button.png')
-        self.img9 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image9)
+        self.img9 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image9))
         self.img9.place(x=400, y=400)
 
         self.image12 = PhotoImage(file='button.png')
-        self.img12 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image12)
+        self.img12 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image12))
         self.img12.place(x=500, y=400)
 
         self.image42 = PhotoImage(file='button.png')
-        self.img42 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image42)
+        self.img42 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image42))
         self.img42.place(x=700, y=400)
 
     def sides(self):
         self.clear_items()
-        parent = self.items_frame
+        parent = root
 
-        self.background = Label(parent, width=200, height=200, bg="#cc3628")
+        self.background = self.track(Label(parent, width=200, height=200, bg="#cc3628"))
         self.background.place(x=600, y=500)
 
         self.image9 = PhotoImage(file='button.png')
-        self.img9 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image9)
+        self.img9 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image9))
         self.img9.place(x=400, y=400)
 
         self.image12 = PhotoImage(file='button.png')
-        self.img12 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image12)
+        self.img12 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image12))
         self.img12.place(x=800, y=800)
 
         self.image42 = PhotoImage(file='button.png')
-        self.img42 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image42)
+        self.img42 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image42))
         self.img42.place(x=1500, y=400)
 
     def specials(self):
         self.clear_items()
-        parent = self.items_frame
+        parent = root
 
-        self.background = Label(parent, width=200, height=200, bg="#cc3628")
+        self.background = self.track(Label(parent, width=200, height=200, bg="#cc3628"))
         self.background.place(x=600, y=500)
 
         self.image9 = PhotoImage(file='button.png')
-        self.img9 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image9)
+        self.img9 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image9))
         self.img9.place(x=400, y=800)
 
         self.image12 = PhotoImage(file='button.png')
-        self.img12 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image12)
+        self.img12 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image12))
         self.img12.place(x=800, y=400)
 
         self.image42 = PhotoImage(file='button.png')
-        self.img42 = Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image42)
+        self.img42 = self.track(Label(parent, borderwidth=100, width=200, bg="#cc3628", image=self.image42))
         self.img42.place(x=1500, y=400)
 
 
