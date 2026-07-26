@@ -80,12 +80,14 @@ class Menu:
                                                  border_width=3, bg_color="#153c7d")
         self.img_order.place(x=1070, y=0)
 
-        # Sidebar frame — placed off-screen to the right initially
         self.sidebar = Frame(root, bg="#153c7d", width=300)
         self.sidebar_visible = False
 
         self.overlay = None
         self.menu_window = None
+
+        root.bind_all("<Button-1>", self.on_global_click, add="+")
+
         self.quiz_frame = Frame(root, background=background_color)
         self.quiz_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
@@ -95,13 +97,6 @@ class Menu:
         self.overlay = None
         self.menu_window = None
 
-        # --- NEW: a list that tracks every widget created by the section
-        # --- methods (pita/main/sides/specials). We DON'T use a covering
-        # --- Frame for this, because a Frame always paints an opaque
-        # --- background across its whole area — a full-screen frame would
-        # --- hide the background image behind it. Instead we parent each
-        # --- card widget directly to `root` (like the original code did)
-        # --- and just destroy them individually when switching sections.
         self.menu_widgets = []
 
     def resize_bg(self, event):
@@ -112,19 +107,11 @@ class Menu:
             self.bg_label.image = self.bg_photo
             self.bg_label.lower()
 
-    # ------------------------------------------------------------------
-    # NEW: call this at the top of every method that draws a section's
-    # cards (pita, main, sides, specials). It destroys every widget that
-    # was tracked from the PREVIOUS section, then empties the list so
-    # the new section can start tracking its own widgets.
-    # ------------------------------------------------------------------
     def clear_items(self):
         for widget in self.menu_widgets:
             widget.destroy()
         self.menu_widgets = []
 
-    # Small helper so we don't forget to append a widget to the tracking
-    # list every time we create one — wrap the widget constructor call.
     def track(self, widget):
         self.menu_widgets.append(widget)
         return widget
@@ -166,6 +153,34 @@ class Menu:
             hover_color="#555555", corner_radius=10,
             command=self.toggle_sidebar
         ).pack(pady=5)
+
+    def on_global_click(self, event):
+        """Closes the order sidebar if the user clicks anywhere outside it.
+
+        bind_all fires this for every click in the whole app, so we have
+        to work out for ourselves whether the click was "outside" the
+        sidebar (and outside the toggle button, which has its own
+        open/close command already)."""
+        if not self.sidebar_visible:
+            return
+
+        w = event.widget
+        while w is not None:
+            if w == self.img_order:
+                return
+            w = getattr(w, "master", None)
+
+        # Is the click inside the sidebar's own screen area?
+        sx = self.sidebar.winfo_rootx()
+        sy = self.sidebar.winfo_rooty()
+        sw = self.sidebar.winfo_width()
+        sh = self.sidebar.winfo_height()
+
+        inside_sidebar = (sx <= event.x_root <= sx + sw and
+                           sy <= event.y_root <= sy + sh)
+
+        if not inside_sidebar:
+            self.toggle_sidebar()
 
     def toggle_sidebar(self):
         if self.sidebar_visible:
@@ -222,14 +237,7 @@ class Menu:
             self.overlay = None
             self.menu_window = None
 
-    # ------------------------------------------------------------------
-    # Every card below is parented to `root` (same as your original code,
-    # so the background image is never covered except by the actual card
-    # widgets). `clear_items()` is called first to remove the PREVIOUS
-    # section's widgets, and every widget created here is wrapped in
-    # `self.track(...)` so it gets added to the tracking list and can be
-    # destroyed the next time a different section button is clicked.
-    # ------------------------------------------------------------------
+
     def pita(self):
         self.clear_items()
         parent = root
@@ -369,9 +377,6 @@ class Menu:
             command=lambda: self.add_to_order(" Chicken Pita - Sweet Chilli - LT", 8.25)))
         self.add_btn5.place(x=1670, y=662)
 
-        # NOTE: the old broken line `self.sides.destroy()` has been removed.
-        # It was trying to destroy a method reference, not a widget — it
-        # would have raised an AttributeError and never actually ran.
 
     def main(self):
         self.clear_items()
