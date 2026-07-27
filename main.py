@@ -730,6 +730,8 @@ class Menu:
         self.food_load3.place(x=1310, y=560)
         self.food_load3.lift()
 
+
+
         self.card4_name = self.track(Label(parent, text="Wedges", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.card4_name.place(x=1295, y=675)
 
