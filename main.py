@@ -1,25 +1,15 @@
-import tkinter
 from tkinter import *
 import tkinter as tk
 import customtkinter
-from tkinter import ttk
 
-import pywinstyles
+
 from PIL import Image, ImageTk
-import random
-
-from customtkinter import CTkScrollableFrame
-from pywinstyles import set_opacity
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
 
 w = 1920
 h = 1080
-name_list = []
-asked = []
-score = 0
-is_clicked = False
 
 
 class Menu:
@@ -27,8 +17,6 @@ class Menu:
         self.parent = parent
         self.root = root
         self.order_items = []
-
-        background_color = "#cc3628"
 
         self.original_bg_image = Image.open("Screenshot 2026-05-18 124046.png")
         self.original_bg_image = self.original_bg_image.resize((1920, 1080), Image.LANCZOS)
@@ -47,7 +35,7 @@ class Menu:
         self.text.place(x=870, y=500)
 
         self.text2 = Label(root, font=("arial", 20), bg="#cc3628",
-                           text="Mount Roskill Grammar was founded 1953 and began with a roll of 363 students, \n that intial started as a part of an auckland rugby union")
+                           text="Mount Roskill Grammar was founded 1953 and began with a roll of 363 students, \n that initially started as a part of an auckland rugby union.")
         self.text2.place(x=600, y=560)
 
         self.button = PhotoImage(file='button_menu (1).png')
@@ -76,43 +64,21 @@ class Menu:
         self.img5.place(x=61, y=750)
 
         self.img_order = customtkinter.CTkButton(root, fg_color="black", text="Order", font=("Canva Sans", 16, "bold"),command=self.toggle_sidebar,
-                                                 corner_radius=100, height=60, width=20,
+                                                 corner_radius=100, height=60, width=30,
                                                  border_width=3, bg_color="#153c7d")
-        self.img_order.place(x=1070, y=0)
+        self.img_order.place(x=10, y=0)
 
-        # Sidebar frame — placed off-screen to the right initially
         self.sidebar = Frame(root, bg="#153c7d", width=300)
         self.sidebar_visible = False
 
-        self.overlay = None
-        self.menu_window = None
-        root.bind_all("<Button-1>",self.on_global_click,add="+")
-        self.quiz_frame = Frame(root, background=background_color)
-        self.quiz_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
-
-        self.content_frame = Frame(self.quiz_frame, background=background_color)
-        self.content_frame.grid()
-
-        self.overlay = None
-        self.menu_window = None
-
+        root.bind_all("<Button-1>", self.on_global_click, add="+")
 
         self.menu_widgets = []
-
-    def resize_bg(self, event):
-        if event.widget == self.parent:
-            new_image = self.original_bg_image.resize((event.width, event.height), Image.LANCZOS)
-            self.bg_photo = ImageTk.PhotoImage(new_image)
-            self.bg_label.config(image=self.bg_photo)
-            self.bg_label.image = self.bg_photo
-            self.bg_label.lower()
-
 
     def clear_items(self):
         for widget in self.menu_widgets:
             widget.destroy()
         self.menu_widgets = []
-
 
     def track(self, widget):
         self.menu_widgets.append(widget)
@@ -156,7 +122,7 @@ class Menu:
             command=self.toggle_sidebar
         ).pack(pady=5)
 
-    def on_global_click(self,event):
+    def on_global_click(self, event):
         if not self.sidebar_visible:
             return
 
@@ -164,7 +130,7 @@ class Menu:
         while w is not None:
             if w == self.img_order:
                 return
-            w = getattr(w,"master", None)
+            w = getattr(w, "master", None)
 
         sx = self.sidebar.winfo_rootx()
         sy = self.sidebar.winfo_rooty()
@@ -173,11 +139,8 @@ class Menu:
         inside_sidebar = (sx <= event.x_root <= sx + sw and
                            sy <= event.y_root <= sy + sh)
 
-
         if not inside_sidebar:
             self.toggle_sidebar()
-
-
 
     def toggle_sidebar(self):
         if self.sidebar_visible:
@@ -192,47 +155,6 @@ class Menu:
     def clear_order(self):
         self.order_items = []
         self.update_order_display()
-
-    def order(self):
-        self.toggle_sidebar()
-
-        self.overlay = tk.Toplevel(self.parent)
-        self.overlay.attributes("-fullscreen", True)
-        self.overlay.attributes("-alpha", 0.5)
-        self.overlay.configure(bg="black")
-        self.overlay.overrideredirect(True)
-
-        self.menu_window = tk.Toplevel(self.parent)
-        self.menu_window.overrideredirect(True)
-        self.menu_window.geometry("300x1080+1620+0")
-        self.menu_window.configure(bg="blue")
-
-        self.overlay.lift()
-        self.menu_window.lift()
-        self.overlay.grab_set()
-        self.overlay.bind("<Button-1>", self.close_overlay)
-
-        self.update_order_display()
-
-    def close_overlay(self, event):
-        x = event.x_root
-        y = event.y_root
-
-        menu_x = self.menu_window.winfo_rootx()
-        menu_y = self.menu_window.winfo_rooty()
-        menu_w = self.menu_window.winfo_width()
-        menu_h = self.menu_window.winfo_height()
-
-        inside_menu = (
-            menu_x <= x <= menu_x + menu_w and
-            menu_y <= y <= menu_y + menu_h
-        )
-
-        if not inside_menu:
-            self.menu_window.destroy()
-            self.overlay.destroy()
-            self.overlay = None
-            self.menu_window = None
 
     def pita(self):
         self.clear_items()
@@ -255,8 +177,6 @@ class Menu:
         self.food_load = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image))
         self.food_load.place(x=410, y=560)
         self.food_load.lift()
-
-
 
         self.pita_name = self.track(Label(parent, text="Teriyaki Pita", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.pita_name.place(x=425, y=675)
@@ -306,7 +226,6 @@ class Menu:
             command=lambda: self.add_to_order("Falafel Pita", 8.25)))
         self.add_btn2.place(x=770, y=762)
 
-
         # --- Card 3 ---
         self.backblue2 = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
             height=320, width=250, text="", fg_color="#153c7d", text_color="#ffffff", corner_radius=23))
@@ -323,7 +242,6 @@ class Menu:
         self.food_load2 = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image2))
         self.food_load2.place(x=1010, y=560)
         self.food_load2.lift()
-
 
         self.card3_name = self.track(Label(parent, text=" Chicken Pita - Mayonnaise", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
         self.card3_name.place(x=975, y=675)
@@ -403,7 +321,6 @@ class Menu:
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
             command=lambda: self.add_to_order(" Chicken Pita - Sweet Chilli - LT", 8.25)))
         self.add_btn5.place(x=1670, y=762)
-
 
     def main(self):
         self.clear_items()
@@ -622,21 +539,19 @@ class Menu:
         self.lightblue.place(x=393, y=540)
         self.lightblue.lift()
 
-        self.food_image = Image.open('download.png')
+        self.food_image = Image.open('download (15).png')
         self.food_image = self.food_image.resize((100, 100))
         self.food_image = ImageTk.PhotoImage(self.food_image)
         self.food_load = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image))
         self.food_load.place(x=410, y=560)
         self.food_load.lift()
 
-
-
         self.pita_name = self.track(Label(parent, text="Pretzel - Sweet", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
-        self.pita_name.place(x=425, y=675)
+        self.pita_name.place(x=415, y=675)
 
         self.pita_desc = self.track(Label(parent, text="Pretzel coated in sweet\n glaze and dusted with \nwarm cinnamon sugar.",
             font=("arial", 9), bg="#153c7d", fg="white"))
-        self.pita_desc.place(x=380, y=698)
+        self.pita_desc.place(x=410, y=698)
 
         self.price_label = self.track(Label(parent, text="$5.50", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label.place(x=375, y=765)
@@ -657,7 +572,7 @@ class Menu:
         self.lightblue1.place(x=693, y=540)
         self.lightblue1.lift()
 
-        self.food_image1 = Image.open('download (1).png')
+        self.food_image1 = Image.open('download (16).png')
         self.food_image1 = self.food_image1.resize((100, 100))
         self.food_image1 = ImageTk.PhotoImage(self.food_image1)
         self.food_load1 = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image1))
@@ -665,11 +580,11 @@ class Menu:
         self.food_load1.lift()
 
         self.card2_name = self.track(Label(parent, text="Cheesy Garlic Pita", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
-        self.card2_name.place(x=735, y=675)
+        self.card2_name.place(x=710, y=675)
 
         self.card2_desc = self.track(Label(parent, text="Pita brushed with garlic \nbutter and topped with melted \ngrated cheese.",
             font=("arial", 9), bg="#153c7d", fg="white"))
-        self.card2_desc.place(x=700, y=698)
+        self.card2_desc.place(x=685, y=698)
 
         self.price_label2 = self.track(Label(parent, text="$3.85", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label2.place(x=675, y=765)
@@ -678,7 +593,6 @@ class Menu:
             hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
             command=lambda: self.add_to_order("Cheesy Garlic Pita - LT", 3.85)))
         self.add_btn2.place(x=770, y=762)
-
 
         # --- Card 3 ---
         self.backblue2 = self.track(customtkinter.CTkButton(parent, bg_color="#cc3628", hover_color="#153c7d",
@@ -690,20 +604,19 @@ class Menu:
         self.lightblue2.place(x=993, y=540)
         self.lightblue2.lift()
 
-        self.food_image2 = Image.open('download (2).png')
+        self.food_image2 = Image.open('download (17).png')
         self.food_image2 = self.food_image2.resize((100, 100))
         self.food_image2 = ImageTk.PhotoImage(self.food_image2)
         self.food_load2 = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image2))
         self.food_load2.place(x=1010, y=560)
         self.food_load2.lift()
 
-
         self.card3_name = self.track(Label(parent, text="Garlic Bread Regular", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
-        self.card3_name.place(x=975, y=675)
+        self.card3_name.place(x=993, y=675)
 
         self.card3_desc = self.track(Label(parent, text="Fresh plain pita with shredded \nchicken,  fresh veggies, \ncheese, and creamy mayo.",
             font=("arial", 9), bg="#153c7d", fg="white"))
-        self.card3_desc.place(x=985, y=698)
+        self.card3_desc.place(x=990, y=698)
 
         self.price_label3 = self.track(Label(parent, text="$4.95", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label3.place(x=975, y=765)
@@ -723,21 +636,19 @@ class Menu:
         self.lightblue3.place(x=1293, y=540)
         self.lightblue3.lift()
 
-        self.food_image3 = Image.open('download (3).png')
+        self.food_image3 = Image.open('download (18).png')
         self.food_image3 = self.food_image3.resize((100, 100))
         self.food_image3 = ImageTk.PhotoImage(self.food_image3)
         self.food_load3 = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image3))
         self.food_load3.place(x=1310, y=560)
         self.food_load3.lift()
 
-
-
         self.card4_name = self.track(Label(parent, text="Wedges", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
-        self.card4_name.place(x=1295, y=675)
+        self.card4_name.place(x=1345, y=675)
 
         self.card4_desc = self.track(Label(parent, text="Warm potato wedges with \na golden, seasoned finish.",
             font=("arial", 9), bg="#153c7d", fg="white"))
-        self.card4_desc.place(x=1285, y=698)
+        self.card4_desc.place(x=1300, y=698)
 
         self.price_label4 = self.track(Label(parent, text="$4.95", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label4.place(x=1275, y=765)
@@ -757,7 +668,7 @@ class Menu:
         self.lightblue4.place(x=1593, y=540)
         self.lightblue4.lift()
 
-        self.food_image4 = Image.open('download (4).png')
+        self.food_image4 = Image.open('download (19).png')
         self.food_image4 = self.food_image4.resize((100, 100))
         self.food_image4 = ImageTk.PhotoImage(self.food_image4)
         self.food_load4 = self.track(Label(parent, borderwidth=0, border=0, height=80, width=120, bg="#416db6", image=self.food_image4))
@@ -765,11 +676,11 @@ class Menu:
         self.food_load4.lift()
 
         self.card5_name = self.track(Label(parent, text="Hashbrown ", font=("arial", 11, "bold"), bg="#153c7d", fg="white"))
-        self.card5_name.place(x=1565, y=675)
+        self.card5_name.place(x=1630, y=675)
 
         self.card5_desc = self.track(Label(parent, text="Golden hash brown with a\n crisp outside and soft, \nfluffy potato inside.",
             font=("arial", 9), bg="#153c7d", fg="white"))
-        self.card5_desc.place(x=1585, y=698)
+        self.card5_desc.place(x=1600, y=698)
 
         self.price_label5 = self.track(Label(parent, text="$2.20", font=("arial", 12, "bold"), bg="#153c7d", fg="white"))
         self.price_label5.place(x=1575, y=765)
