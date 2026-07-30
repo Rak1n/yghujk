@@ -1,18 +1,6 @@
 from tkinter import *
 import tkinter as tk
 import customtkinter
-
-
-
-
-from PIL import Image, ImageTk
-from tkinter import *
-import tkinter as tk
-import customtkinter
-
-
-
-
 from PIL import Image, ImageTk
 
 
@@ -55,48 +43,48 @@ class Menu:
 
 
        self.text2 = Label(root, font=("arial", 20), bg="#cc3628",
-                          text="Mount Roskill Grammar was founded 1953 and began with a roll of 363 students, \n that initially started as a part of an auckland rugby union.")
+                          text="Mount Roskill Grammar was founded 1953 and began with a roll of 363 students, \n that initially started as a part of an Auckland rugby union.")
        self.text2.place(x=600, y=560)
 
 #Images for the button for the menu sidebar
        self.button = PhotoImage(file='button_menu (1).png')
-       self.img = Label(root, borderwidth=0, width=200, bg="#cc3628", image=self.button,
+       self.menu_img = Label(root, borderwidth=0, width=200, bg="#cc3628", image=self.button,
                         activebackground="#cc3628", activeforeground="white")
-       self.img.place(x=60, y=470)
+       self.menu_img.place(x=60, y=470)
 
 
        self.button2 = PhotoImage(file='button_pita.png')
-       self.img2 = Button(root, borderwidth=0,command=self.pita, width=200, bg="#cc3628",
+       self.Pita_image = Button(root, borderwidth=0,command=self.pita_load, width=200, bg="#cc3628",
                           image=self.button2, activebackground="#cc3628", activeforeground="white")
-       self.img2.place(x=60, y=540)
+       self.Pita_image.place(x=60, y=540)
 
-       self.img2.bind("<Enter>", lambda e: self.img2.config(bg="#a02010"))
-       self.img2.bind("<Leave>", lambda e: self.img2.config(bg="#cc3628"))
+       self.Pita_image.bind("<Enter>", lambda e: self.Pita_image.config(bg="#a02010"))
+       self.Pita_image.bind("<Leave>", lambda e: self.Pita_image.config(bg="#cc3628"))
 
 
        self.button3 = PhotoImage(file='spec.png')
-       self.img3 = Button(root, borderwidth=0, command=self.specials, width=200, bg="#cc3628",
+       self.Specials_image = Button(root, borderwidth=0, command=self.specials_load, width=200, bg="#cc3628",
                           image=self.button3, activebackground="#cc3628", activeforeground="white")
-       self.img3.place(x=60, y=610)
-       self.img3.bind("<Enter>", lambda e: self.img3.config(bg="#a02010"))
-       self.img3.bind("<Leave>", lambda e: self.img3.config(bg="#cc3628"))
+       self.Specials_image.place(x=60, y=610)
+       self.Specials_image.bind("<Enter>", lambda e: self.Specials_image.config(bg="#a02010"))
+       self.Specials_image.bind("<Leave>", lambda e: self.Specials_image.config(bg="#cc3628"))
 
 
        self.button4 = PhotoImage(file='button_main.png')
-       self.img4 = Button(root, borderwidth=0, command=self.main, width=200, bg="#cc3628",
+       self.Main_image = Button(root, borderwidth=0, command=self.main_load, width=200, bg="#cc3628",
                           image=self.button4, activebackground="#cc3628", activeforeground="white")
-       self.img4.place(x=60, y=680)
-       self.img4.bind("<Enter>", lambda e: self.img4.config(bg="#a02010"))
-       self.img4.bind("<Leave>", lambda e: self.img4.config(bg="#cc3628"))
+       self.Main_image.place(x=60, y=680)
+       self.Main_image.bind("<Enter>", lambda e: self.Main_image.config(bg="#a02010"))
+       self.Main_image.bind("<Leave>", lambda e: self.Main_image.config(bg="#cc3628"))
 
 
 
        self.button5 = PhotoImage(file='button_sides (1).png')
-       self.img5 = Button(root, borderwidth=0, width=200, command=self.sides, bg="#cc3628",
+       self.Sides_image = Button(root, borderwidth=0, width=200, command=self.sides_load, bg="#cc3628",
                           image=self.button5, activebackground="#cc3628", activeforeground="white")
-       self.img5.place(x=61, y=750)
-       self.img4.bind("<Enter>", lambda e: self.img4.config(bg="#a02010"))
-       self.img4.bind("<Leave>", lambda e: self.img4.config(bg="#cc3628"))
+       self.Sides_image.place(x=61, y=750)
+       self.Sides_image.bind("<Enter>", lambda e: self.Sides_image.config(bg="#a02010"))
+       self.Sides_image.bind("<Leave>", lambda e: self.Sides_image.config(bg="#cc3628"))
 
 
 #Order Button code
@@ -114,7 +102,7 @@ class Menu:
 
 
        self.menu_widgets = []
-#function to show an pop up when adding orders
+#Function to show a pop-up when adding orders
    def show_confirmation(self,message):
        if hasattr(self,"pop_up_label") and self.pop_up_label.winfo_exists():
            self.pop_up_label.destroy()
@@ -125,13 +113,13 @@ class Menu:
        root.after(1500, self.pop_up_label.destroy)
 
 
-#function to clear the selected items
+#Function to clear the selected items
    def clear_items(self):
        for widget in self.menu_widgets:
            widget.destroy()
        self.menu_widgets = []
 
-#function when placed order is clicked when in order page
+#Function when placed order is clicked when in order page
    def place_order(self):
        if not self.order_items:
            return  # nothing to confirm if the order is empty
@@ -172,15 +160,15 @@ class Menu:
        # Clear the cart now that it's placed
        self.order_items = []
 
-
+#Function to keep the list an assign variables, used for one loop when switching menu
    def track(self, widget):
        self.menu_widgets.append(widget)
        return widget
-
+#Function to update the Order Button with the number of order, giving a visibility of system
    def update_order_button(self):
        count = len(self.order_items)
        self.img_order.configure(text=f"Order ({count})")
-
+#Function to add order, and records the selected item, and calls to show a confirmation pop-up
    def add_to_order(self, item_name, price):
        self.order_items.append((item_name, price))
        self.update_order_button()
@@ -190,7 +178,7 @@ class Menu:
        except Exception:
            pass
 
-#function to open order page, and creates the order pages elements
+#Function to open order page, and creates the order pages elements
    def update_order_display(self):
        if not self.sidebar_visible:
            return
@@ -230,7 +218,7 @@ class Menu:
            command=self.toggle_sidebar
        ).pack(pady=5)
 
-   #function to close order page when clicked outside assigned area
+   #Function to close order page when clicked outside assigned area
    def on_global_click(self, event):
        if not self.sidebar_visible:
            return
@@ -254,7 +242,7 @@ class Menu:
        if not inside_sidebar:
            self.toggle_sidebar()
 
-#toggles the visible and functionality of the order page
+#toggles the visible and Functionality of the order page
    def toggle_sidebar(self):
        if self.sidebar_visible:
            self.sidebar.place_forget()
@@ -265,13 +253,13 @@ class Menu:
            self.sidebar_visible = True
            self.update_order_display()
 
-#function clear all orders
+#Function clear all orders
    def clear_order(self):
        self.order_items = []
        self.update_order_display()
 
-#function to generate Pita menu item when Pita is clicked in the sidebar
-   def pita(self):
+#Function to generate Pita menu item when Pita is clicked in the sidebar
+   def pita_load(self):
        self.clear_items()
        parent = root
 
@@ -474,9 +462,9 @@ class Menu:
            command=lambda: self.add_to_order(" Chicken Pita - Sweet Chilli - LT", 8.25)))
        self.add_btn5.place(x=1670, y=762)
 
-   # function to generate Main menu item when Main is clicked in the sidebar
+   # Function to generate Main menu item when Main is clicked in the sidebar
 
-   def main(self):
+   def main_load(self):
        self.clear_items()
        parent = root
 
@@ -715,9 +703,9 @@ class Menu:
                                    command=lambda: self.add_to_order("Nachos - Beef - LT", 9.35)))
        self.add_btn5.place(x=1670, y=762)
 
-   # function to generate Sides menu item when Sides is clicked in the sidebar
+   # Function to generate Sides menu item when Sides is clicked in the sidebar
 
-   def sides(self):
+   def sides_load(self):
        self.clear_items()
        parent = root
 
@@ -920,9 +908,9 @@ class Menu:
            command=lambda: self.add_to_order("Hashbrown", 2.20)))
        self.add_btn5.place(x=1670, y=762)
 
-   # function to generate Specials menu item when Specials is clicked in the sidebar
+   # Function to generate Specials menu item when Specials is clicked in the sidebar
 
-   def specials(self):
+   def specials_load(self):
        self.clear_items()
        parent = root
 
@@ -1059,9 +1047,7 @@ class Menu:
        self.price_label3.place(x=975, y=765)
 
 
-       self.add_btn3 = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",
-           hover_color="#a02010", bg_color="#153c7d", corner_radius=10,
-           command=lambda: self.add_to_order("Premium Pie - Steak&Cheese", 8.50)))
+       self.add_btn3 = self.track(customtkinter.CTkButton(parent, text="Add +", width=80, height=28, fg_color="#cc3628",hover_color="#a02010", bg_color="#153c7d", corner_radius=10, command=lambda: self.add_to_order("Premium Pie - Steak&Cheese", 8.50)))
        self.add_btn3.place(x=1070, y=762)
 
 
