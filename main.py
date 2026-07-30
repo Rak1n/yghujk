@@ -89,7 +89,7 @@ class Menu:
        self.img5.place(x=61, y=750)
 
 #Order Button code
-       self.img_order = customtkinter.CTkButton(root, fg_color="black", text=f"Order ({0+len(self.order_items)})", font=("Canva Sans", 16, "bold"),command=self.toggle_sidebar,
+       self.img_order = customtkinter.CTkButton(root, fg_color="black", text=f"Order ({len(self.order_items)})", font=("Canva Sans", 16, "bold"),command=self.toggle_sidebar,
                                                 corner_radius=100, height=60, width=30,
                                                 border_width=3, bg_color="#153c7d")
        self.img_order.place(x=10, y=0)
@@ -109,9 +109,6 @@ class Menu:
        for widget in self.menu_widgets:
            widget.destroy()
        self.menu_widgets = []
-       self.order_items = []
-       self.update_order_button()
-       self.update_order_display()
 
 #function when placed order is clicked when in order page
    def place_order(self):
@@ -161,7 +158,7 @@ class Menu:
 
    def update_order_button(self):
        count = len(self.order_items)
-       self.img_order.configure(text=f"Order ({0+count})")
+       self.img_order.configure(text=f"Order ({count})")
 
    def add_to_order(self, item_name, price):
        self.order_items.append((item_name, price))
