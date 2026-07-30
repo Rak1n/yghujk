@@ -80,6 +80,38 @@ class Menu:
             widget.destroy()
         self.menu_widgets = []
 
+    def place_order(self):
+        if not self.order_items:
+            return  # nothing to confirm if the order is empty
+
+        total = sum(price for _, price in self.order_items)
+
+        # Wipe the sidebar and show a confirmation screen in its place
+        for widget in self.sidebar.winfo_children():
+            widget.destroy()
+
+        Label(self.sidebar, text="✓", font=("arial", 40, "bold"),
+              bg="#153c7d", fg="#4CAF50").pack(pady=(40, 0))
+
+        Label(self.sidebar, text="Order Placed!", font=("arial", 18, "bold"),
+              bg="#153c7d", fg="white").pack(pady=(0, 10))
+
+        Label(self.sidebar, text=f"Total charged: ${total:.2f}",
+              font=("arial", 12), bg="#153c7d", fg="white").pack(pady=5)
+
+        Label(self.sidebar, text="Thanks — your order is being prepared.",
+              font=("arial", 11), bg="#153c7d", fg="#cccccc", wraplength=250,
+              justify="center").pack(pady=(5, 20))
+
+        customtkinter.CTkButton(
+            self.sidebar, text="✕ Close", fg_color="#333333",
+            hover_color="#555555", corner_radius=10,
+            command=self.toggle_sidebar
+        ).pack(pady=5)
+
+        # Clear the cart now that it's "placed"
+        self.order_items = []
+
     def track(self, widget):
         self.menu_widgets.append(widget)
         return widget
@@ -113,7 +145,7 @@ class Menu:
         customtkinter.CTkButton(
             self.sidebar, text="Place  Order", fg_color="#cc3628",
             hover_color="#a02010", corner_radius=10,
-            command=self.clear_order
+            command=self.place_order
         ).pack(pady=10)
 
         customtkinter.CTkButton(
