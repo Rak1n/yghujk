@@ -66,27 +66,38 @@ class Menu:
 
 
        self.button2 = PhotoImage(file='button_pita.png')
-       self.img2 = Button(root, borderwidth=0, command=self.pita, width=200, bg="#cc3628",
+       self.img2 = Button(root, borderwidth=0,command=self.pita, width=200, bg="#cc3628",
                           image=self.button2, activebackground="#cc3628", activeforeground="white")
        self.img2.place(x=60, y=540)
+
+       self.img2.bind("<Enter>", lambda e: self.img2.config(bg="#a02010"))
+       self.img2.bind("<Leave>", lambda e: self.img2.config(bg="#cc3628"))
 
 
        self.button3 = PhotoImage(file='spec.png')
        self.img3 = Button(root, borderwidth=0, command=self.specials, width=200, bg="#cc3628",
                           image=self.button3, activebackground="#cc3628", activeforeground="white")
        self.img3.place(x=60, y=610)
+       self.img3.bind("<Enter>", lambda e: self.img3.config(bg="#a02010"))
+       self.img3.bind("<Leave>", lambda e: self.img3.config(bg="#cc3628"))
 
 
        self.button4 = PhotoImage(file='button_main.png')
        self.img4 = Button(root, borderwidth=0, command=self.main, width=200, bg="#cc3628",
                           image=self.button4, activebackground="#cc3628", activeforeground="white")
        self.img4.place(x=60, y=680)
+       self.img4.bind("<Enter>", lambda e: self.img4.config(bg="#a02010"))
+       self.img4.bind("<Leave>", lambda e: self.img4.config(bg="#cc3628"))
+
 
 
        self.button5 = PhotoImage(file='button_sides (1).png')
        self.img5 = Button(root, borderwidth=0, width=200, command=self.sides, bg="#cc3628",
                           image=self.button5, activebackground="#cc3628", activeforeground="white")
        self.img5.place(x=61, y=750)
+       self.img4.bind("<Enter>", lambda e: self.img4.config(bg="#a02010"))
+       self.img4.bind("<Leave>", lambda e: self.img4.config(bg="#cc3628"))
+
 
 #Order Button code
        self.img_order = customtkinter.CTkButton(root, fg_color="black", text=f"Order ({len(self.order_items)})", font=("Canva Sans", 16, "bold"),command=self.toggle_sidebar,
