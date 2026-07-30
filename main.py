@@ -103,6 +103,16 @@ class Menu:
 
 
        self.menu_widgets = []
+#function to show an pop up when adding orders
+   def show_confirmation(self,message):
+       if hasattr(self,"pop_up_label") and self.pop_up_label.winfo_exists():
+           self.pop_up_label.destroy()
+       self.pop_up_label = Label( root, text=message, font=("arial", 12, "bold"),bg="#4CAF50", fg="white", padx=20, pady=10
+       )
+       self.pop_up_label.place(relx=0.5, y=70, anchor="n")
+       self.pop_up_label.lift()
+       root.after(1500, self.pop_up_label.destroy)
+
 
 #function to clear the selected items
    def clear_items(self):
@@ -163,6 +173,7 @@ class Menu:
    def add_to_order(self, item_name, price):
        self.order_items.append((item_name, price))
        self.update_order_button()
+       self.show_confirmation(f"{item_name.strip()} added ✓")
        try:
            self.update_order_display()
        except Exception:
